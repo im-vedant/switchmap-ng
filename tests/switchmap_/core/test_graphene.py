@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Test the general module."""
 
-import unittest
 import os
 import sys
 import json
+import pytest
 
 # Try to create a working PYTHONPATH
 EXEC_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -32,68 +32,46 @@ else:
     )
     sys.exit(2)
 
-
 # Create the necessary configuration to load the module
 from tests.testlib_ import setup
-
-CONFIG = setup.config()
-CONFIG.save()
-
 from switchmap.core import graphene as testimport
 
+@pytest.fixture(scope="module")
+def config():
+    """Create and return configuration for tests."""
+    test_config = setup.config()
+    test_config.save()
+    yield test_config
+    test_config.cleanup()
 
-class TestFunctions(unittest.TestCase):
-    """Checks all functions and methods."""
-
-    #########################################################################
-    # General object setup
-    #########################################################################
-
-    @classmethod
-    def setUpClass(cls):
-        """Execute these steps before starting tests."""
-        # Load the configuration in case it's been deleted after loading the
-        # configuration above. Sometimes this happens when running
-        # `python3 -m unittest discover` where another the tearDownClass of
-        # another test module prematurely deletes the configuration required
-        # for this module
-        config = setup.config()
-        config.save()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Execute these steps when all tests are completed."""
-        # Cleanup the
-        CONFIG.cleanup()
-
-    def test_normalize(self):
-        """Testing function normalize."""
-        # Initialize key variables
-        expected = {
-            "roots": [
-                {
-                    "event": {
-                        "zones": [
-                            {
-                                "devices": [
-                                    {
-                                        "hostname": "device01.example.org",
-                                        "idxDevice": 27,
-                                    },
-                                    {
-                                        "hostname": "device02.example.org",
-                                        "idxDevice": 28,
-                                    },
-                                ],
-                                "name": "TEST",
-                            }
-                        ]
-                    }
+def test_normalize(config):
+    """Testing function normalize."""
+    # Initialize key variables
+    expected = {
+        "roots": [
+            {
+                "event": {
+                    "zones": [
+                        {
+                            "devices": [
+                                {
+                                    "hostname": "device01.example.org",
+                                    "idxDevice": 27,
+                                },
+                                {
+                                    "hostname": "device02.example.org",
+                                    "idxDevice": 28,
+                                },
+                            ],
+                            "name": "TEST",
+                        }
+                    ]
                 }
-            ]
-        }
+            }
+        ]
+    }
 
-        data_string = """
+    data_string = """
 {
   "data": {
     "roots": {
@@ -134,29 +112,28 @@ class TestFunctions(unittest.TestCase):
   }
 }
 """
-        # Convert data to dict
-        data = json.loads(data_string).get("data")
+    # Convert data to dict
+    data = json.loads(data_string).get("data")
 
-        # Test
-        result = testimport.normalize(data)
-        self.assertEqual(result, expected)
+    # Test
+    result = testimport.normalize(data)
+    assert result == expected
 
-    def test_nodes(self):
-        """Testing function nodes."""
-        # Initialize key variables
-        expected = [
-            {
-                "name": "TEST",
-                "devices": [
-                    {"hostname": "device01.example.org", "idxDevice": 27},
-                    {"hostname": "device02.example.org", "idxDevice": 28},
-                ],
-            }
-        ]
+def test_nodes(config):
+    """Testing function nodes."""
+    # Initialize key variables
+    expected = [
+        {
+            "name": "TEST",
+            "devices": [
+                {"hostname": "device01.example.org", "idxDevice": 27},
+                {"hostname": "device02.example.org", "idxDevice": 28},
+            ],
+        }
+    ]
 
-        data_string = """
+    data_string = """
 {
-
                 "edges": [
                   {
                     "node": {
@@ -182,14 +159,9 @@ class TestFunctions(unittest.TestCase):
                 ]
 }
 """
-        # Convert data to dict
-        data = json.loads(data_string).get("edges")
+    # Convert data to dict
+    data = json.loads(data_string).get("edges")
 
-        # Test
-        result = testimport.nodes(data)
-        self.assertEqual(result, expected)
-
-
-if __name__ == "__main__":
-    # Do the unit test
-    unittest.main()
+    # Test
+    result = testimport.nodes(data)
+    assert result == expected
