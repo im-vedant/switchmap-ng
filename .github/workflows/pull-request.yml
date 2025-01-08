@@ -184,16 +184,12 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: PalisadoesFoundation/switchmap-ng
           verbose: true
+          files: ./coverage.xml
           gcov_ignore: "docs/"
           fail_ci_if_error: false
           name: "${{env.CODECOV_UNIQUE_NAME}}"
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          results: ./coverage.xml
-          
+     
+
       - name: Test acceptable level of code coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
