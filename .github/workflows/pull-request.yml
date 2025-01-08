@@ -188,8 +188,6 @@ jobs:
           gcov_ignore: "docs/"
           fail_ci_if_error: false
           name: "${{env.CODECOV_UNIQUE_NAME}}"
-     
-
       - name: Test acceptable level of code coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
