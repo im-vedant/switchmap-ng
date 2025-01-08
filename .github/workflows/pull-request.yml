@@ -191,7 +191,7 @@ jobs:
       - name: Test acceptable level of code coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
-          path: ./coverage.xml
+          path: /home/runner/work/switchmap-ng/switchmap-ng/coverage.xml
           min_coverage: 0.0
 
   Test-Docusaurus-Deployment:
